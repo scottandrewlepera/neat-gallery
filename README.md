@@ -3,8 +3,8 @@
 Easy responsive image galleries for static websites. Point this tool at a folder of images and it'll do the following:
 
 * create thumbnail images for fast loading
-* generate an HTML file for your gallery, in either a grid or masonry layout
-* automatically connect your gallery to Photoswipe
+* generate a minimal, customizable HTML file for your gallery with a grid or masonry layout
+* automatically set up [Photoswipe](https://photoswipe.com/)
 
 You can then upload your folder to your website to create an instant swipeable gallery.
 
@@ -27,6 +27,8 @@ This will result in the following:
 
 Open `gallery.html` in a web browser to see the gallery. By default, all image URLs are relative to the page and the layout will be a grid of squares. The gallery page contains inline CSS and JS that imports the Photoswipe library. Click or tap a gallery image to launch the Photoswipe viewer.
 
+https://github.com/user-attachments/assets/01b181ba-d8ed-4929-a31f-38d0e0e7c458
+
 You can then upload your gallery folder to your website as-is, or alter the CSS and HTML as needed.
 
 ## Gallery options
@@ -35,18 +37,18 @@ The following command-line arguments provide more options:
 
 | Argument | Default | Description |
 |--------|---------|-------------|
-| -i, --input | N/A | The target folder of images. This is the only required argument |
-| -w, --width | 500 | The desired width of thumbnail images in pixels |
-| -t, --title | "Gallery" | The gallery title or name |
-| -p | "." | A prefix for image URLS. Defaults to relative local to gallery page |
-| -l, --layout | "`grid`" | The gallery layout. Accepted values are "grid" or "masonry" |
-| --nohtml | false | When present, only the list of images is rendered, inline CSS and JS is excluded from the HTML output
+| `-i`,<br>`--input` | N/A | The target folder of images. This is the only required argument |
+| `-w`,<br>`--width` | 500 | The desired width of thumbnail images in pixels |
+| `-t`,<br>`--title` | "Gallery" | The gallery title or name |
+| `-p` | "." | A prefix for image URLS. Defaults to relative local to gallery page |
+| `-l`,<br>`--layout` | "grid" | The gallery layout. Accepted values are "grid" or "masonry" |
+| `--nohtml` | false | When present, only the list of images is output. Inline CSS, Photoswipe JS, and the enclosing HTML body is excluded from the HTML output
 
-IMPORTANT: the `--width` argument dictates the width of the generated thumbnail image **file**, not the onscreen size of the displayed thumbnail image!
+IMPORTANT: the `--width` argument dictates the width of the generated thumbnail image **file** in order to keep filesizes manageable. This is not the onscreen size of the thumbnail image!
 
 Use the `-p` argument to override from where the images will be served. Note that you will need to move the images to that location.
 
-The `--nohtml` argument is useful if you have copied the CSS and JS into a common file on your website and no longer need it to be included in gallery pages.
+The `--nohtml` argument is useful if you have copied the CSS and Photoswipe JS into a common file on your website and no longer need it to be included in gallery pages.
 
 ### Examples
 
