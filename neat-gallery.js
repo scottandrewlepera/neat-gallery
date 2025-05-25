@@ -5,7 +5,7 @@ import {
   readFileSync,
   writeFileSync
 } from 'fs';
-import { extname, join } from 'path';
+import { extname, join, resolve } from 'path';
 import sizeOf from 'image-size';
 import minimist from 'minimist';
 import sharp from 'sharp';
@@ -32,7 +32,8 @@ if (!dir) {
   process.exit();
 }
 const title = args.title || args.t || "Gallery";
-const path = args.p || ".";
+let path = args.p || '.';
+path = path.replace(/\/+$/, '');
 const width = parseInt(args.width) || parseInt(args.w) || defaultWidth;
 let layout = ( args.layout === 'masonry' || 
                args.l === 'masonry') ? 'masonry' : defaultLayout;
@@ -43,8 +44,10 @@ const noJs = args.nojs !== undefined;
 const noHTML = args.nohtml !== undefined;
 
 const outputFilename = `gallery.html`;
-const thumbDir = `${dir}/thumbnails`;
-const thumbURLPrefix = `${path}/thumbnails`;
+const outputJsonFileName = `gallery.json`;
+const thumbDir = join(dir, 'thumbnails');
+const thumbURLPrefix = join(path, 'thumbnails');
+let jsonFile = {};
 
 if (!existsSync(dir)) {
   console.error(`Input directory not found: ${dir}`);
@@ -54,6 +57,14 @@ if (!existsSync(dir)) {
 [dir, thumbDir].forEach(dir => {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 });
+
+const jsonFilePath = join(dir, outputJsonFileName);
+const jsonExists = existsSync(jsonFilePath)
+
+if (jsonExists) {
+  const buf = readFileSync(jsonFilePath);
+  jsonFile = JSON.parse(buf);
+}
 
 const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
 
@@ -115,11 +126,13 @@ const htmlCss = `
 const htmlPhotoSwipeJs = `
     <script type="module">
       import PhotoSwipeLightbox from 'https://unpkg.com/photoswipe@${psVersion}/dist/photoswipe-lightbox.esm.js';
+
       const lightbox = new PhotoSwipeLightbox({
         gallery: '.neat-gallery',
         children: 'a',
         pswpModule: () => import('https://unpkg.com/photoswipe@${psVersion}/dist/photoswipe.esm.js')
       });
+
     lightbox.init();
     </script>
 
@@ -168,13 +181,22 @@ for (const file of imageFiles) {
     continue; // skip this file
   }
 
+  if (!jsonFile[file]) {
+    jsonFile[file] = {
+      alt: ""
+    }
+  }
+
   html += `
   <li>
     <a href="${imageURL}" 
        data-pswp-width="${dimensions.width}" 
        data-pswp-height="${dimensions.height}" 
        target="_blank">
-      <img src="${thumbURL}" alt="" class="neat-gallery-img">
+      <img src="${thumbURL}" 
+        alt="${jsonFile[file].alt}" 
+        class="neat-gallery-img" 
+      >
     </a>
   </li>\n`;
 };
@@ -194,4 +216,14 @@ try {
   process.exit();
 }
 
-console.log(`Gallery page written to ${outputPath}`);
+console.log(`Gallery HTML page written to ${outputPath}`);
+
+if (!jsonExists || regen) {
+  try {
+    writeFileSync(jsonFilePath, JSON.stringify(jsonFile, null, '\t'), 'utf8');
+  } catch (err) {
+    console.error(`Error writing file ${jsonFilePath}`, err);
+    process.exit();
+  }
+  console.log(`Gallery metadata written to ${jsonFilePath}`);
+}
